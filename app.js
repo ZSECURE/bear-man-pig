@@ -14,10 +14,18 @@ const DNS_TYPES = {
 };
 
 const RESOLVERS = [
-  (name, type) =>
-    `https://dns.google/resolve?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`,
-  (name, type) =>
-    `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`,
+  {
+    name: "Google DNS",
+    headers: {},
+    buildUrl: (recordName, type) =>
+      `https://dns.google/resolve?name=${encodeURIComponent(recordName)}&type=${encodeURIComponent(type)}`,
+  },
+  {
+    name: "Cloudflare DNS",
+    headers: { accept: "application/dns-json" },
+    buildUrl: (recordName, type) =>
+      `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(recordName)}&type=${encodeURIComponent(type)}`,
+  },
 ];
 
 const form = document.getElementById("check-form");
@@ -70,22 +78,22 @@ async function fetchJson(url, headers = {}) {
 async function resolveDns(name, type) {
   const failures = [];
 
-  for (const buildUrl of RESOLVERS) {
-    const url = buildUrl(name, type);
-    const headers =
-      url.includes("cloudflare-dns.com")
-        ? { accept: "application/dns-json" }
-        : {};
+  for (const resolver of RESOLVERS) {
+    const url = resolver.buildUrl(name, type);
 
     try {
-      const payload = await fetchJson(url, headers);
+      const payload = await fetchJson(url, resolver.headers);
       return payload;
     } catch (error) {
-      failures.push(error);
+      failures.push(`${resolver.name}: ${error.message}`);
     }
   }
 
-  throw new Error(failures[0]?.message || "All DNS resolvers failed.");
+  throw new Error(
+    `DNS resolution failed for ${name} (${type}). Tried ${RESOLVERS.length} resolvers. ${
+      failures.join(" | ") || "No resolver details were returned."
+    }`,
+  );
 }
 
 async function getAnswerRecords(name, type) {
@@ -234,7 +242,9 @@ async function getMtaStsPolicy(domain) {
   try {
     const response = await fetch(policyUrl);
     if (!response.ok) {
-      throw new Error(`Policy request failed with status ${response.status}`);
+      throw new Error(
+        `Policy request failed with status ${response.status} (${response.statusText || "unknown"}). This may be due to CORS restrictions.`,
+      );
     }
 
     const policyText = await response.text();

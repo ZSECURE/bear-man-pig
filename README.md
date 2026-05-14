@@ -13,7 +13,7 @@ A minimal static web tool for checking common email security records:
 Because the app is fully static, you can serve it with any web server. For example:
 
 ```bash
-cd /home/runner/work/bear-man-pig/bear-man-pig
+cd bear-man-pig
 python3 -m http.server 8000
 ```
 
