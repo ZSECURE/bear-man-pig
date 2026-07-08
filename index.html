@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Security Check</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <p class="eyebrow">Email Security Check</p>
+        <h1>Check SPF, DKIM, DMARC, TLS-RPT, and MTA-STS</h1>
+        <p class="intro">
+          Enter a domain to inspect the email security records that are publicly
+          available over DNS and HTTPS.
+        </p>
+      </section>
+
+      <section class="panel">
+        <form id="check-form" class="check-form">
+          <label class="field">
+            <span>Domain</span>
+            <input
+              id="domain"
+              name="domain"
+              type="text"
+              placeholder="example.gov.uk"
+              autocomplete="off"
+              required
+            />
+          </label>
+
+          <label class="field">
+            <span>DKIM selectors (optional)</span>
+            <input
+              id="selectors"
+              name="selectors"
+              type="text"
+              placeholder="selector1, selector2"
+              autocomplete="off"
+            />
+          </label>
+
+          <div class="actions">
+            <button id="submit-button" type="submit">Run checks</button>
+          </div>
+        </form>
+
+        <p class="hint">
+          If you leave selectors empty, the tool will try a small set of common
+          DKIM selectors.
+        </p>
+      </section>
+
+      <section id="status" class="status" aria-live="polite"></section>
+      <section id="results" class="results" aria-live="polite"></section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
